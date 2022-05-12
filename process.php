@@ -23,7 +23,7 @@ if (isset($_POST['showUsers'])) {
             <?php endif; ?>
         </td>
         <td class="text-center align-middle"><button class="btn btn-sm btn-outline-secondary badge" name="update" type="button"
-                    onclick="getUserData(<?= $row['id']; ?>)" >Edit</button>
+                    onclick="getUserData(<?= $row['id']; ?>)" id="update" >Edit</button>
             &nbsp;<button class="btn btn-sm btn-outline-secondary badge" type="button"
                     onclick="deleteUser(<?= $row['id']; ?>)" ><i class="fa fa-trash"></i></button>
         </td>

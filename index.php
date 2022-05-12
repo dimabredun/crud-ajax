@@ -23,7 +23,7 @@
                                 <form method="post" id="menu_form" action="index.php">
                                     <div id="outer">
                                         <div class="inner">
-                                            <button type="button" class="btn btn-success mt-2" data-toggle="modal" data-target="#userformModal" id="menu">Add</button>
+                                            <button type="button" class="btn btn-success mt-2" data-toggle="modal" data-target="#userformModal" id="add">Add</button>
                                         </div>
                                         <div class="inner">
                                             <select name="select" id="menu" style="margin: 0px 0px 20px 20px">
@@ -53,7 +53,7 @@
                                         </tbody>
 
                                 </table>
-                                    <div class="inner"><button type="button" class="btn btn-success mt-2" data-toggle="modal" data-target="#userformModal" id="menu">Add</button></div>
+                                    <div class="inner"><button type="button" class="btn btn-success mt-2" data-toggle="modal" data-target="#userformModal" id="add">Add</button></div>
 
                                     <form method="post" id="menu_form2" >
                                         <select name="select2" id="menu2" style="margin: 0px 0px 20px 20px" >
@@ -70,61 +70,72 @@
                             </div>
                         </div>
                 </div>
-            </div>
+        </div>
 
 <div class="modal fade" id="userformModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">User</h5>
+        <h5 class="modal-title" id="exampleModalLabel"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
         <div class="modal-body">
-             <form action="" method="POST" id="user_form">
-                <div class="form-group">
-                    <label>First Name</label>
-                    <input type="text" name="firstname" id="firstname" class="form-control" value="">
-                </div>
-
-                <div class="form-group">
-                     <label>Last name</label>
-                     <input type="text" name="lastname" id="lastname" class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label>Status </label>
-                    <label class="switch" style="margin-left: 20px">
+          <div class="py-1">
+            <form action="" method="POST" id="user_form">
+              <div class="row">
+                <div class="col">
+                  <div class="row">
+                    <div class="col">
+                      <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="firstname" id="firstname" class="form-control">
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div class="form-group">
+                        <label>Last name</label>
+                        <input type="text" name="lastname" id="lastname" class="form-control">
+                      </div>
+                    </div>
+                    <div class="col" >
+                      <div class="form-group">
+                        <label>Status </label>
+                         <br>
+                        <label class="switch">
                         <input type="checkbox" name="status" id="status"/>
                         <span class="slider round"></span>
-                    </label>
+                        </label>
+                      </div>
+                    </div>
+                    <input type="hidden" name="hidden_status" id="hidden_status">
+                  <div class="col">
+                    <div class="form-group">
+                      <label>Role</label>
+                        <br>
+                      <select name="role" id="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                  </div>
+                  </div>
                 </div>
-                 <input type="hidden" name="hidden_status" id="hidden_status">
-
-                 <div class="form-group">
-                     <label>Role </label>
-                     <select name="role" id="role" style="margin-left: 30px">
-                         <option value="user">User</option>
-                         <option value="admin">Admin</option>
-                     </select>
-                 </div>
-
+              </div>
                 <div class="row">
                     <div class="col d-flex justify-content-end">
-                        <input type="hidden" id="hiddendata" name="hiddendata">
-                        <button class="btn btn-primary" type="submit" name="add">Save Changes</button>
+                      <button class="btn btn-primary" type="submit" name="add" >Save Changes</button>
+                      <input type="hidden" id="hiddendata" name="hiddendata">
                     </div>
-                </div>
+                  </div>
             </form>
+          </div>
         </div>
-      <div class="modal-footer">
-      </div>
     </div>
   </div>
 </div>
 
-</div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -138,6 +149,12 @@
         $("#userformModal").on('hidden.bs.modal', function(){
             $("#userformModal").find("input").val("")
         });
+
+        $('#add').click (function () {
+            $('#userformModal').find('.modal-title').text("Add user");
+        });
+
+
 
         // above and below menus submission
         $('#menu_form').on('submit', function (e) {
@@ -186,6 +203,7 @@
 
     // get id of user for edition
     function getUserData(updateid) {
+        $('#userformModal').find('.modal-title').text("Edit user");
         $('#hiddendata').val(updateid);
         $.post('process.php', {updateid:updateid}, function (data,status){
             var userid = JSON.parse(data);
@@ -220,7 +238,7 @@
             status:status,
             hiddendata:hiddendata
         }, function (data, status) {
-           $('#userformModal').modal('hide');
+            $('#userformModal').modal('hide');
             showUsers();
         });
     }
@@ -282,6 +300,7 @@
                     console.log(response);
                     if (response.status) {
                         toastr.success(response.message);
+
                         $("#user_form")[0].reset();
                         $("#userformModal").modal('hide');
                         showUsers();
