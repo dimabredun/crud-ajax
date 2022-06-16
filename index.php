@@ -53,7 +53,7 @@
                                         </tbody>
 
                                 </table>
-                                    <div class="inner"><button type="button" class="btn btn-success mt-2" data-toggle="modal" data-target="#userformModal" id="add">Add</button></div>
+                                    <div class="inner"><button type="button" class="btn btn-success mt-2" data-toggle="modal" data-target="#userformModal" id="add2">Add</button></div>
 
                                     <form method="post" id="menu_form2" >
                                         <select name="select2" id="menu2" style="margin: 0px 0px 20px 20px" >
@@ -72,21 +72,19 @@
                 </div>
         </div>
 
+<!--Main modal-->
+
 <div class="modal fade" id="userformModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <div class="modal-header">
+        <form action="" method="POST" id="user_form">
+        <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
         <div class="modal-body">
-          <div class="py-1">
-            <form action="" method="POST" id="user_form">
-              <div class="row">
-                <div class="col">
-                  <div class="row">
                     <div class="col">
                       <div class="form-group">
                         <label>First Name</label>
@@ -102,8 +100,7 @@
                     <div class="col" >
                       <div class="form-group">
                         <label>Status </label>
-                         <br>
-                        <label class="switch">
+                        <label class="switch" style="margin-left: 22px">
                         <input type="checkbox" name="status" id="status"/>
                         <span class="slider round"></span>
                         </label>
@@ -113,27 +110,43 @@
                   <div class="col">
                     <div class="form-group">
                       <label>Role</label>
-                        <br>
-                      <select name="role" id="role">
+                      <select name="role" id="role" value="user" style="margin-left: 30px">
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
                       </select>
                     </div>
                   </div>
-                  </div>
-                </div>
-              </div>
-                <div class="row">
-                    <div class="col d-flex justify-content-end">
-                      <button class="btn btn-primary" type="submit" name="add" >Save Changes</button>
-                      <input type="hidden" id="hiddendata" name="hiddendata">
-                    </div>
-                  </div>
-            </form>
-          </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button class="btn btn-primary" type="submit" name="add" >Save</button>
+            <input type="hidden" id="hiddendata" name="hiddendata">
+        </div>
+        </form>
     </div>
   </div>
+</div>
+
+<!--Delete Modal-->
+
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please confirm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this record?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="delete_btn" name="delete_btn"class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -147,14 +160,26 @@
         showUsers();
 
         $("#userformModal").on('hidden.bs.modal', function(){
-            $("#userformModal").find("input").val("")
+            $("#userformModal").find("input, select").val("");
+            $("#userformModal").find("select[name='role']").val("user");
+            $("#userformModal").find("input[type=checkbox]").prop('checked', false);
         });
 
         $('#add').click (function () {
             $('#userformModal').find('.modal-title').text("Add user");
+            $('#userformModal').find('.btn-primary').text("Add");
         });
 
+        $('#add2').click (function () {
+            $('#userformModal').find('.modal-title').text("Add user");
+            $('#userformModal').find('.btn-primary').text("Add");
+        });
 
+        $('#userformModal').click(function () {
+            if ($('#add') || $('#add2')) {
+                $('.btn-primary').text('Add');
+            }
+        });
 
         // above and below menus submission
         $('#menu_form').on('submit', function (e) {
@@ -165,7 +190,6 @@
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function (response) {
-                    console.log(response);
                     if (response.status) {
                         showUsers();
                         $("#menu_form").find("select").val("select")
@@ -186,7 +210,6 @@
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function (response) {
-                    console.log(response);
                     if (response.status) {
                         $("#menu_form").find("select").val("select")
                         showUsers();
@@ -204,6 +227,7 @@
     // get id of user for edition
     function getUserData(updateid) {
         $('#userformModal').find('.modal-title').text("Edit user");
+        $('#userformModal').find('.btn-primary').text("Save");
         $('#hiddendata').val(updateid);
         $.post('process.php', {updateid:updateid}, function (data,status){
             var userid = JSON.parse(data);
@@ -221,7 +245,6 @@
         $('#userformModal').modal('show');
     }
 
-
     function updateUser() {
         var firstname = $('#firstname').val();
         var lastname = $('#lastname').val();
@@ -238,95 +261,102 @@
             status:status,
             hiddendata:hiddendata
         }, function (data, status) {
-            $('#userformModal').modal('hide');
+            $('#userformModal').modal('hide').val('');
             showUsers();
         });
     }
 
     function deleteUser(deleteid) {
-        if (confirm("Are you sure you want to delete this record?")) {
+        $('#deleteModal').modal('show');
+        $('#delete_btn').on('click', function() {
+        // if (confirm("Are you sure you want to delete this record?")) {
             $.ajax({
                 url: 'process.php',
                 type: 'post',
                 data: {deleteid: deleteid},
                 success: function () {
+                    $('#deleteModal').modal('hide');
+
                     showUsers();
                 }
             })
-        }
+        })
     }
 
-        // initializing checkboxes
-        $('#select-all').change(function () {
-            if ($(this).is(':checked')) {
-                $('input[name="update_many[]"]').prop('checked', true);
-            } else {
-                $('input[name="update_many[]"]').each(function () {
-                    $(this).prop('checked', false);
-                });
-            }
-        });
+    var tableElement = $('table');
+    tableElement.on('change', 'input[type=checkbox]', function(event) {
+        var changed = event.target,
+            checkboxes = tableElement
+                .find('input[type=checkbox]')
+                .not('#select-all');
+        if (changed.id === 'select-all') {
+            checkboxes.prop('checked', changed.checked)
+        } else {
+            var allChecked = checkboxes.length === checkboxes.filter(':checked').length
+            $('#select-all').prop(
+                'checked', allChecked
+            );
+        }
+    });
 
-        $('input[name="update_many[]"]').click(function(){
-            var total_checkboxes = $('input[name="update_many[]"]').length;
-            var total_checkboxes_checked = $('input[name="update_many[]"]:checked').length;
-
-            if(total_checkboxes_checked == total_checkboxes){
-                $('#select-all').prop('checked',true);
-            }else{
-                $('#select-all').prop('checked',false);
-            }
-        });
-
-        // modal form submission for insert
-        $('#status').change(function () {
-            if ($(this).prop('checked')) {
-                $('#hidden_status').val(1);
-            }
-            else {
-                $('#hidden_status').val(0);
-            }
-        });
-
-        $("#user_form").submit(function(e) {
-            e.preventDefault();
-
-            $.ajax({
-                type : "POST",
-                url : "process.php",
-                data : $("#user_form").serialize(),
-                dataType : 'json',
-                success : function(response) {
-                    console.log(response);
-                    if (response.status) {
-                        toastr.success(response.message);
-
-                        $("#user_form")[0].reset();
-                        $("#userformModal").modal('hide');
-                        showUsers();
-                    }else{
-                        toastr.error(response.message);
-                    }
-                }
-            });
-        });
-
-        function showUsers() {
-            var showUsers = 'true';
-
-            $.ajax({
-                url: 'process.php',
-                type: 'post',
-                data: {
-                    showUsers:showUsers
-                },
-                success: function (data, status) {
-                    $('#users_data').html(data);
-                }
+    // initializing checkboxes
+    $('#select-all').change(function () {
+        if ($(this).is(':checked')) {
+            $('input[name="update_many[]"]').prop('checked', true);
+        } else {
+            $('input[name="update_many[]"]').each(function () {
+                $(this).prop('checked', false);
             });
         }
+    });
 
-        showUsers();
+    // modal form submission for insert
+    $('#status').change(function () {
+        if ($(this).prop('checked')) {
+            $('#hidden_status').val(1);
+        }
+        else {
+            $('#hidden_status').val(0);
+        }
+    });
+
+    $("#user_form").submit(function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            type : "POST",
+            url : "process.php",
+            data : $("#user_form").serialize(),
+            dataType : 'json',
+            success : function(response) {
+                if (response.status) {
+                    toastr.success('Record created successfully');
+                    $("#user_form")[0].reset();
+                    $("#userformModal").modal('hide');
+                    showUsers();
+                }else{
+                    toastr.error(response.message);
+                }
+            }
+        });
+    });
+
+    function showUsers() {
+        var showUsers = 'true';
+
+        $.ajax({
+            url: 'process.php',
+            type: 'post',
+            data: {
+                showUsers:showUsers
+            },
+            success: function (data, status) {
+                $('#users_data').html(data);
+            }
+        });
+    }
+
+    showUsers();
 </script>
 </body>
 </html>
