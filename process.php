@@ -7,7 +7,6 @@ if (isset($_POST['showUsers'])) {
     $result = $statement->execute();
 
     if ($statement->rowCount() > 0) {
-
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
 
     ?>
@@ -23,7 +22,7 @@ if (isset($_POST['showUsers'])) {
             <?php endif; ?>
         </td>
         <td class="text-center align-middle"><button class="btn btn-sm btn-outline-secondary badge" name="update" type="button"
-                    onclick="getUserData(<?= $row['id']; ?>)" >Edit</button>
+                    onclick="getUserData(<?= $row['id']; ?>)" id="update" >Edit</button>
             &nbsp;<button class="btn btn-sm btn-outline-secondary badge" type="button"
                     onclick="deleteUser(<?= $row['id']; ?>)" ><i class="fa fa-trash"></i></button>
         </td>
@@ -42,7 +41,6 @@ if (isset($_POST['updateid'])) {
 
     $response = [];
 
-
     while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
         $response = $row;
     }
@@ -50,7 +48,7 @@ if (isset($_POST['updateid'])) {
     echo json_encode($response);
 } else {
     $response['status'] = 200;
-    $response['message'] = 'ID is not found0';
+    $response['message'] = 'ID is not found';
 }
 
 if (isset($_POST['firstname'])) {
@@ -69,20 +67,28 @@ if (isset($_POST['firstname'])) {
 
     if ($user_id == '') {
         $statement = $pdo->prepare("INSERT INTO `user`(name, role, status) VALUES ('$name','$role','$status')");
-        $message = "Record created successfully.";
     } else {
         $statement = $pdo->prepare("UPDATE `user` SET `name`='$name',`role`='$role', `status` = '$status' WHERE `id`='$user_id'");
-        $message = "Record updated successfully.";
     }
     $result = $statement->execute();
 
+    $lastId = $pdo->lastInsertId();
+
+    $stmt = $pdo->prepare("SELECT * FROM user WHERE id = '$lastId'");
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
     if ($result) {
-        $response = array('status' => true, 'message' => $message);
+        $resp['status'] = true;
     } else {
-        $response = array('status' => false, 'message' => 'Error');
+        $resp['status'] = false;
     }
 
-    echo json_encode($response);
+    $resp['error'] = null;
+    $resp['user'] = $row;
+
+    echo json_encode($resp);
     exit();
 }
 
